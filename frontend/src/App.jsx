@@ -153,7 +153,7 @@ function App() {
                     <div className="insight-content">{analysis.recommended_action}</div>
                   </div>
                   <div className="analysis-footer">
-                    <span>Model: Gemini 2.5 Pro (RAG)</span>
+                    <span>Model: Gemini 3.5 Flash (RAG)</span>
                     <span className="confidence">
                       <span className="confidence-dot"></span>
                       Confidence: {(analysis.confidence * 100).toFixed(0)}%

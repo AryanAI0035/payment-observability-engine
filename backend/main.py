@@ -74,7 +74,15 @@ async def analyze_failed_transaction(tx: Transaction):
     print(f"Triggering Agentic Analysis for {tx.id}...")
     
     # Simulate fetching RAG context from Observability Logs (MongoDB in real app)
-    logs = f"ERROR: Connection timeout to acquiring bank for merchant {tx.merchant}. Trace ID: {uuid.uuid4()}"
+    scenarios = [
+        f"ERROR: Connection timeout to acquiring bank for merchant {tx.merchant}. Trace ID: {uuid.uuid4()}",
+        f"WARN: Suspected fraudulent activity. High velocity of transactions matching {tx.merchant} profile. Risk score 98. Trace ID: {uuid.uuid4()}",
+        f"ERROR: Insufficient funds in user account for {tx.amount} {tx.currency}. Gateway declined. Trace ID: {uuid.uuid4()}",
+        f"ERROR: Invalid CVV provided for {tx.merchant} charge. 3rd consecutive failure. Trace ID: {uuid.uuid4()}",
+        f"FATAL: Gateway rate limit exceeded for {tx.merchant}. 429 Too Many Requests. Trace ID: {uuid.uuid4()}",
+        f"ERROR: Expired payment method used for {tx.merchant}. Trace ID: {uuid.uuid4()}",
+    ]
+    logs = random.choice(scenarios)
     
     prompt = f"""
     You are an Agentic AI specialized in payment network observability.
@@ -113,7 +121,7 @@ async def analyze_failed_transaction(tx: Transaction):
         ai_analyses[tx.id] = RootCauseAnalysis(
             transaction_id=tx.id,
             reason=reason,
-            confidence=0.92,
+            confidence=round(random.uniform(0.82, 0.99), 2),
             recommended_action=action
         )
         print(f"AI Analysis completed for {tx.id}")
