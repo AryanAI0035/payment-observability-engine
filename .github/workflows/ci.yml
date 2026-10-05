@@ -1,10 +1,10 @@
-name: Agentic Engine CI/CD
+name: OmniPay CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master", "main" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "master", "main" ]
 
 jobs:
   build-and-test:
@@ -33,6 +33,9 @@ jobs:
       run: |
         flake8 backend --count --select=E9,F63,F7,F82 --show-source --statistics
         
+    - name: Test Backend
+      run: python -m pytest backend/tests -q
+
     - name: Install Frontend Dependencies
       working-directory: ./frontend
       run: npm ci || npm install
@@ -42,4 +45,4 @@ jobs:
       run: npm run build
       
     - name: Test Docker Compose Build
-      run: docker-compose build
+      run: docker compose build

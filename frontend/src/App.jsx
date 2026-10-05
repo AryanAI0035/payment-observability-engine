@@ -58,7 +58,7 @@ function App() {
     <div className="app-container">
       <header className="header">
         <Activity color="#3b82f6" size={32} />
-        <h1>Omni<span>Pay</span> Agentic Observability</h1>
+        <h1>Omni<span>Pay</span> Payment Observability</h1>
       </header>
 
       <div className="dashboard-grid">
@@ -119,7 +119,7 @@ function App() {
         <div className="card" style={{ height: 'fit-content' }}>
           <h2 className="card-title">
             <BrainCircuit color="#a855f7" size={24} style={{ marginRight: '12px' }} />
-            Agentic Root Cause Analysis
+            AI Failure Analysis
           </h2>
           
           {!selectedTx ? (
@@ -140,7 +140,7 @@ function App() {
               {loadingAnalysis ? (
                 <div className="loader-container">
                   <div className="spinner"></div>
-                  <div className="pulse-text">Agentic AI diagnosing failure logs...</div>
+                  <div className="pulse-text">Analyzing a simulated failure log...</div>
                 </div>
               ) : analysis ? (
                 <div className="analysis-box">
@@ -153,10 +153,10 @@ function App() {
                     <div className="insight-content">{analysis.recommended_action}</div>
                   </div>
                   <div className="analysis-footer">
-                    <span>Model: Gemini 3.5 Flash (RAG)</span>
+                    <span>Model: {analysis.model} · Synthetic log</span>
                     <span className="confidence">
                       <span className="confidence-dot"></span>
-                      Confidence: {(analysis.confidence * 100).toFixed(0)}%
+                      Confidence: not measured
                     </span>
                   </div>
                 </div>

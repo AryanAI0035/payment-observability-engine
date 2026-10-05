@@ -9,7 +9,6 @@ import asyncio
 
 # --- AI imports ---
 from google import genai
-from google.genai import types
 
 app = FastAPI(title="Agentic Transaction Observability Engine")
 
@@ -22,8 +21,9 @@ app.add_middleware(
 )
 
 # Configuration
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "your_gemini_api_key")
-client = genai.Client(api_key=GEMINI_API_KEY)
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
+client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
 # --- Models ---
 class Transaction(BaseModel):
@@ -37,7 +37,8 @@ class Transaction(BaseModel):
 class RootCauseAnalysis(BaseModel):
     transaction_id: str
     reason: str
-    confidence: float
+    confidence: float | None = None
+    model: str = GEMINI_MODEL
     recommended_action: str
 
 # In-memory storage for simulation
@@ -73,7 +74,7 @@ async def simulate_transactions():
 async def analyze_failed_transaction(tx: Transaction):
     print(f"Triggering Agentic Analysis for {tx.id}...")
     
-    # Simulate fetching RAG context from Observability Logs (MongoDB in real app)
+    # Choose a synthetic failure log; no retrieval or database query is performed.
     scenarios = [
         f"ERROR: Connection timeout to acquiring bank for merchant {tx.merchant}. Trace ID: {uuid.uuid4()}",
         f"WARN: Suspected fraudulent activity. High velocity of transactions matching {tx.merchant} profile. Risk score 98. Trace ID: {uuid.uuid4()}",
@@ -93,7 +94,7 @@ async def analyze_failed_transaction(tx: Transaction):
     Amount: {tx.amount} {tx.currency}
     Merchant: {tx.merchant}
     
-    Observability Logs (RAG retrieved):
+    Synthetic failure log:
     {logs}
     
     Provide a brief root cause analysis in the following format:
@@ -101,9 +102,13 @@ async def analyze_failed_transaction(tx: Transaction):
     Recommended Action: [What the engineering team should do]
     """
     
+    if client is None:
+        print("Analysis disabled: set GEMINI_API_KEY to enable it.")
+        return
+
     try:
-        response = client.models.generate_content(
-            model='gemini-3.5-flash',
+        response = await client.aio.models.generate_content(
+            model=GEMINI_MODEL,
             contents=prompt,
         )
         
@@ -121,7 +126,7 @@ async def analyze_failed_transaction(tx: Transaction):
         ai_analyses[tx.id] = RootCauseAnalysis(
             transaction_id=tx.id,
             reason=reason,
-            confidence=round(random.uniform(0.82, 0.99), 2),
+            confidence=None,  # No calibrated confidence is available.
             recommended_action=action
         )
         print(f"AI Analysis completed for {tx.id}")
